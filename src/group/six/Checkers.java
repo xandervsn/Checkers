@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ public class Checkers implements ActionListener {
 	JButton oChangeName = new JButton("Change O's Name.");
 	JButton preCurrent;
 	JButton current;
+	String preCurrentTile;
 	String currentTile;
 	JTextField xChangeField = new JTextField();
 	JTextField oChangeField = new JTextField();
@@ -101,10 +101,8 @@ public class Checkers implements ActionListener {
 				y = 'f';
 			}
 			String tile = (char)y + String.valueOf(x);
-			int info = 900000;
 			boardMap.put(tile, true);
-			pieceMap.put(tile, info);
-			//king, alive, black, position
+			//king, alive, white, position
 			
 			if(y > 'c') {
 				button[x][y-97].setIcon(whitePiece);
@@ -112,6 +110,7 @@ public class Checkers implements ActionListener {
 			}else {
 				button[x][y-97].setIcon(blackPiece);
 				pieceMap.put(tile, 900100);
+				System.out.println(pieceMap.get(tile));
 			}
 			
 			if(tile.equals("h6")) {
@@ -134,7 +133,7 @@ public class Checkers implements ActionListener {
 		new Checkers();
 	}
 	
-	public void onTile(JButton current, JButton preCurrent, String currentTile) {
+	public void onTile(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile, int k, int l) {
 		System.out.println(preCurrent + " " + current);
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
@@ -143,19 +142,21 @@ public class Checkers implements ActionListener {
 				}else if(button[j][i].getIcon().toString().equals("blackPieceH.png")) {
 					boardMap.replace((char)(i+97) + String.valueOf(j), false);
 					boardMap.replace(currentTile, true);
+					pieceMap.replace(currentTile, null);
+					
 					preCurrent.setIcon(null);
-					current.setIcon(blackPiece);
+					current.setIcon(whitePiece);
 				}else if(button[j][i].getIcon().toString().equals("whitePieceH.png")) {
 					boardMap.replace((char)(i+97) + String.valueOf(j), false);
 					boardMap.replace(currentTile, true);
 					button[j][i].setIcon(null);
-					current.setIcon(whitePiece);
+					current.setIcon(blackPiece);
 				}
 			}
 		}
 	}
 	
-	public void onPiece(JButton current, JButton preCurrent, String currentTile) {
+	public void onPiece(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile) {
 		if(String.valueOf(pieceMap.get(currentTile)).charAt(3) == '1') {
 			current.setIcon(whitePieceH);
 		}else {
@@ -167,13 +168,16 @@ public class Checkers implements ActionListener {
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
 				if(e.getSource().equals(button[j][i])) {
+					/*if((pieceMap.get((char)(i+97) + String.valueOf(j))).toString().charAt(3) == '1'){
+						boolean isWhite = true;
+						System.out.println("white");
+					}else {
+						boolean isBlack = true;
+						System.out.println("black");
+					}*/
 					if(ran && current.getIcon() != null) {
 						preCurrent = current;
-						if(String.valueOf(pieceMap.get(currentTile)).charAt(3) == '1') {
-							current.setIcon(blackPiece);
-						}else {
-							current.setIcon(whitePiece);
-						}
+						preCurrentTile = currentTile;
 					}else {
 						preCurrent = button[j][i];
 					}
@@ -181,9 +185,9 @@ public class Checkers implements ActionListener {
 					current = button[j][i];
 					ran = true;
 					if(boardMap.get(currentTile)) {
-						onPiece(current, preCurrent, currentTile);
+						onPiece(current, preCurrent, currentTile, preCurrentTile, i, j);
 					}else {
-						onTile(current, preCurrent, currentTile);
+						onTile(current, preCurrent, currentTile, preCurrentTile);
 					}
 				}
 			}
