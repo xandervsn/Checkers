@@ -187,9 +187,9 @@ public class Checkers implements ActionListener {
 					current = button[j][i];
 					ran = true;
 					if(boardMap.get(currentTile)) {
-						onPiece(current, preCurrent, currentTile, preCurrentTile, i, j);
+						onPiece(current, preCurrent, currentTile, preCurrentTile);
 					}else {
-						onTile(current, preCurrent, currentTile, preCurrentTile);
+						onTile(current, preCurrent, currentTile, preCurrentTile, i, j);
 					}
 				}
 			}
