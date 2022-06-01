@@ -82,6 +82,8 @@ public class Checkers implements ActionListener {
 		for (int y = 'a'; y < 'i'; y++) {
 			for (int x = 0; x < 8; x++) {
 				String tile = (char)y + String.valueOf(x);
+				//TODO: boardMap<tile, piece> - not a boolean, but an actual value you can use
+				//(will still functionally be a boolean if returned as null
 				boardMap.put(tile, false);
 			}
 		}
