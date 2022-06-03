@@ -20,7 +20,7 @@ public class Checkers implements ActionListener {
 	boolean ran = false;
 	int whiteWins = 0;
 	int blackWins = 0;
-	HashMap<String, Boolean> boardMap = new HashMap<String, Boolean>();
+	HashMap<String, String> boardMap = new HashMap<String, String>();
 	HashMap<String, Integer> pieceMap = new HashMap<String, Integer>();
 	
 	//containers
@@ -84,7 +84,7 @@ public class Checkers implements ActionListener {
 				String tile = (char)y + String.valueOf(x);
 				//TODO: boardMap<tile, piece> - not a boolean, but an actual value you can use
 				//(will still functionally be a boolean if returned as null
-				boardMap.put(tile, false);
+				boardMap.put(tile, null);
 			}
 		}
 		/* a b c d e f g h
@@ -103,7 +103,7 @@ public class Checkers implements ActionListener {
 				y = 'f';
 			}
 			String tile = (char)y + String.valueOf(x);
-			boardMap.put(tile, true);
+			boardMap.put(tile, tile);
 			//king, alive, white, position
 			
 			if(y > 'c') {
@@ -112,7 +112,6 @@ public class Checkers implements ActionListener {
 			}else {
 				button[x][y-97].setIcon(blackPiece);
 				pieceMap.put(tile, 900100);
-				System.out.println(pieceMap.get(tile));
 			}
 			
 			if(tile.equals("h6")) {
@@ -135,34 +134,34 @@ public class Checkers implements ActionListener {
 		new Checkers();
 	}
 	
-	public void onTile(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile, int k, int l) {
-		System.out.println(preCurrent + " " + current);
-		for (int i = 0; i < button.length; i++) {
-			for (int j = 0; j < button[0].length; j++) {
-				if(button[j][i].getIcon() == null) {
-					
-				}else if(button[j][i].getIcon().toString().equals("blackPieceH.png")) {
-					boardMap.replace((char)(i+97) + String.valueOf(j), false);
-					boardMap.replace(currentTile, true);
-					pieceMap.replace(currentTile, null);
-					
-					preCurrent.setIcon(null);
-					current.setIcon(whitePiece);
-				}else if(button[j][i].getIcon().toString().equals("whitePieceH.png")) {
-					boardMap.replace((char)(i+97) + String.valueOf(j), false);
-					boardMap.replace(currentTile, true);
-					button[j][i].setIcon(null);
-					current.setIcon(blackPiece);
+	public void onTile(JButton current, JButton preCurrent, String currentTile, String preCurrentTile, int x, int y) {
+		System.out.println(preCurrentTile);
+		if(preCurrent.getIcon() != null) {
+			if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+				preCurrent.setIcon(null);
+				current.setIcon(whitePiece);
+			}else if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+				preCurrent.setIcon(null);
+				current.setIcon(blackPiece);
+			}else {
+				if(whiteTurn) {
+					whiteTurn = false;
+					blackTurn = true;
+				}else if(blackTurn) {
+					whiteTurn = true;
+					blackTurn = false;
 				}
 			}
 		}
 	}
 	
 	public void onPiece(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile) {
-		if(String.valueOf(pieceMap.get(currentTile)).charAt(3) == '1') {
-			current.setIcon(whitePieceH);
-		}else {
-			current.setIcon(blackPieceH);
+		if(current.getIcon() != null) {
+			if(current.getIcon().toString().equals("blackPiece.png") && blackTurn) {
+				current.setIcon(blackPieceH);
+			}if(current.getIcon().toString().equals("whitePiece.png") && whiteTurn) {
+				current.setIcon(whitePieceH);
+			}
 		}
 	}
 
@@ -170,26 +169,31 @@ public class Checkers implements ActionListener {
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
 				if(e.getSource().equals(button[j][i])) {
-					/*if((pieceMap.get((char)(i+97) + String.valueOf(j))).toString().charAt(3) == '1'){
-						boolean isWhite = true;
-						System.out.println("white");
-					}else {
-						boolean isBlack = true;
-						System.out.println("black");
-					}*/
 					if(ran && current.getIcon() != null) {
 						preCurrent = current;
 						preCurrentTile = currentTile;
 					}else {
 						preCurrent = button[j][i];
+						preCurrentTile = (char)(j+97) + String.valueOf(i);
 					}
-					currentTile = (char)(i+97) + String.valueOf(j);
+					
+					currentTile = (char)(j+97) + String.valueOf(i);
 					current = button[j][i];
 					ran = true;
-					if(boardMap.get(currentTile)) {
+					
+					if(current.getIcon() != null) {
 						onPiece(current, preCurrent, currentTile, preCurrentTile);
 					}else {
-						onTile(current, preCurrent, currentTile, preCurrentTile, i, j);
+						if(isLegal(current, j, i)) {
+							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
+						}
+						if(whiteTurn) {
+							whiteTurn = false;
+							blackTurn = true;
+						}else if(blackTurn) {
+							whiteTurn = true;
+							blackTurn = false;
+						}
 					}
 				}
 			}
@@ -215,4 +219,12 @@ public class Checkers implements ActionListener {
 			}
 		}
 	}
+	
+	public boolean isLegal(JButton current, int j, int i) {
+		if(button[j][i].getIcon() != null) {
+			
+		}
+		return false;
+	}
+	
 }
