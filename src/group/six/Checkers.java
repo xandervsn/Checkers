@@ -135,7 +135,6 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void onTile(JButton current, JButton preCurrent, String currentTile, String preCurrentTile, int x, int y) {
-		System.out.println(preCurrentTile);
 		if(preCurrent.getIcon() != null) {
 			if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
 				preCurrent.setIcon(null);
@@ -144,13 +143,7 @@ public class Checkers implements ActionListener {
 				preCurrent.setIcon(null);
 				current.setIcon(blackPiece);
 			}else {
-				if(whiteTurn) {
-					whiteTurn = false;
-					blackTurn = true;
-				}else if(blackTurn) {
-					whiteTurn = true;
-					blackTurn = false;
-				}
+				swap();
 			}
 		}
 	}
@@ -158,8 +151,14 @@ public class Checkers implements ActionListener {
 	public void onPiece(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile) {
 		if(current.getIcon() != null) {
 			if(current.getIcon().toString().equals("blackPiece.png") && blackTurn) {
+				if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+					preCurrent.setIcon(whitePiece);
+				}
 				current.setIcon(blackPieceH);
 			}if(current.getIcon().toString().equals("whitePiece.png") && whiteTurn) {
+				if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+					preCurrent.setIcon(blackPiece);
+				}
 				current.setIcon(whitePieceH);
 			}
 		}
@@ -186,14 +185,16 @@ public class Checkers implements ActionListener {
 					}else {
 						if(isLegal(current, j, i)) {
 							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
+						}else {
+							if(preCurrent.getIcon() != null) {
+								if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+									preCurrent.setIcon(whitePiece);
+								}else if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+									preCurrent.setIcon(blackPiece);
+								}
+							}
 						}
-						if(whiteTurn) {
-							whiteTurn = false;
-							blackTurn = true;
-						}else if(blackTurn) {
-							whiteTurn = true;
-							blackTurn = false;
-						}
+						swap();
 					}
 				}
 			}
@@ -220,10 +221,80 @@ public class Checkers implements ActionListener {
 		}
 	}
 	
-	public boolean isLegal(JButton current, int j, int i) {
-		if(button[j][i].getIcon() != null) {
-			
+	public void swap() {
+		if(whiteTurn) {
+			whiteTurn = false;
+			blackTurn = true;
+		}else if(blackTurn) {
+			whiteTurn = true;
+			blackTurn = false;
 		}
+	}
+	
+	/*	
+	button[g+1][y+1] down
+	button[g-1][y+1]
+	
+	button[g+1][y-1] up
+	button[g-1][y-1]
+	 */
+	
+	public boolean isLegal(JButton current, int j, int i) {
+		for (int y = 0; y < button.length; y++) {
+			for (int g = 0; g < button[0].length; g++) {
+				if(button[g][y].getIcon() != null && ((button[g][y].getIcon().toString().equals("blackPieceH.png")) || (button[g][y].getIcon().toString().equals("whitePieceH.png")))) {
+					int a = 1;
+					int b = 1;
+					int c = 2;
+					int d = 2;
+					if(g == 6 || g == 1) {
+						c = 0;
+					}else if(y == 6 || y == 0) {
+						d = 0;
+					}else if(g == 7 || g == 1) {
+						a = 0;
+						c = 0;
+					}else if(y == 7 || y == 0) {
+						b = 0;
+						d = 0;
+					}
+					if(blackTurn) {
+						if(button[g][y].getIcon().toString().equals("blackPieceH.png")) {
+							if(current == button[g+a][y-b] || current == button[g-a][y-b]) {
+								return true;
+							}else if(current == button[g+c][y-d]) {
+								if(button[g+c-a][y-d+b].getIcon().toString().equals("whitePiece.png")) {
+									button[g-c+a][y-d+b].setIcon(null);
+									return true;
+								}
+							}else if(current == button[g-c][y-d]) {
+								if(button[g-c+a][y-d+b].getIcon().toString().equals("whitePiece.png")) {
+									button[g-c+a][y-d+b].setIcon(null);
+									return true;
+								}
+							}
+						}
+					}else if(whiteTurn) {
+						if(button[g][y].getIcon().toString().equals("whitePieceH.png")) {
+							if(current == button[g+a][y+b] || current == button[g-a][y+b]) {
+								return true;
+							}else if(current == button[g+c][y+d]) {
+								if(button[g+c-a][y+d-b].getIcon().toString().equals("blackPiece.png")) {
+									button[g+c-a][y+d-b].setIcon(null);
+									return true;
+								}
+							}else if(current == button[g-c][y+d]) {
+								if(button[g-c+a][y+d-b].getIcon().toString().equals("blackPiece.png")) {
+									button[g-c+a][y+d-b].setIcon(null);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		swap();
 		return false;
 	}
 	
