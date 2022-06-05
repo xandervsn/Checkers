@@ -82,7 +82,7 @@ public class Checkers implements ActionListener {
 		for (int y = 'a'; y < 'i'; y++) {
 			for (int x = 0; x < 8; x++) {
 				String tile = (char)y + String.valueOf(x);
-				//TODO: boardMap<tile, piece> - not a boolean, but an actual value you can use
+				//DONE: boardMap<tile, piece> - not a boolean, but an actual value you can use
 				//(will still functionally be a boolean if returned as null
 				boardMap.put(tile, null);
 			}
@@ -243,49 +243,65 @@ public class Checkers implements ActionListener {
 		for (int y = 0; y < button.length; y++) {
 			for (int g = 0; g < button[0].length; g++) {
 				if(button[g][y].getIcon() != null && ((button[g][y].getIcon().toString().equals("blackPieceH.png")) || (button[g][y].getIcon().toString().equals("whitePieceH.png")))) {
-					int a = 1;
-					int b = 1;
-					int c = 2;
-					int d = 2;
-					if(g == 6 || g == 1) {
-						c = 0;
-					}else if(y == 6 || y == 0) {
-						d = 0;
-					}else if(g == 7 || g == 1) {
-						a = 0;
-						c = 0;
-					}else if(y == 7 || y == 0) {
-						b = 0;
-						d = 0;
+					int xModA = 1; int xModB = 1;
+					int yModA = 1; int yModB = 1;
+					int xMod2A = 2; int xMod2B = 2;
+					int yMod2A = 2; int yMod2B = 2;
+					
+					//TODO this part is fucked idk y
+					if(g == 6) {
+						xMod2A = 0;
+					}else if(y == 6) {
+						yMod2A = 0;
+					}else if(g == 0) {
+						xModA = 0;
+						xMod2A = 0;
+					}else if(y == 0) {
+						yModA = 0;
+						yMod2A = 0;
 					}
+					
+					if(g == 1) {
+						xMod2B = 0;
+					}else if(y == 1) {
+						yMod2B = 0;
+					}else if(g == 7) {
+						xModB = 0;
+						xMod2B = 0;
+					}else if(y == 7) {
+						yModB = 0;
+						yMod2B = 0;
+					}
+
+
 					if(blackTurn) {
 						if(button[g][y].getIcon().toString().equals("blackPieceH.png")) {
-							if(current == button[g+a][y-b] || current == button[g-a][y-b]) {
+							if(current == button[g+xModA][y-yModA] || current == button[g-xModB][y-yModB]) {
 								return true;
-							}else if(current == button[g+c][y-d]) {
-								if(button[g+c-a][y-d+b].getIcon().toString().equals("whitePiece.png")) {
-									button[g-c+a][y-d+b].setIcon(null);
+							}else if(current == button[g+xMod2A][y-yMod2A]) {
+								if(button[g+xMod2A-xModA][y-yMod2A+yModA].getIcon().toString().equals("whitePiece.png")) {
+									button[g-xMod2A+xModA][y-yMod2A+yModA].setIcon(null);
 									return true;
 								}
-							}else if(current == button[g-c][y-d]) {
-								if(button[g-c+a][y-d+b].getIcon().toString().equals("whitePiece.png")) {
-									button[g-c+a][y-d+b].setIcon(null);
+							}else if(current == button[g-xMod2B][y-yMod2B]) {
+								if(button[g-xMod2B+xModB][y-yMod2B+yModB].getIcon().toString().equals("whitePiece.png")) {
+									button[g-xMod2B+xModB][y-yMod2B+yModB].setIcon(null);
 									return true;
 								}
 							}
 						}
 					}else if(whiteTurn) {
 						if(button[g][y].getIcon().toString().equals("whitePieceH.png")) {
-							if(current == button[g+a][y+b] || current == button[g-a][y+b]) {
+							if(current == button[g+xModA][y+yModA] || current == button[g-xModB][y+yModB]) {
 								return true;
-							}else if(current == button[g+c][y+d]) {
-								if(button[g+c-a][y+d-b].getIcon().toString().equals("blackPiece.png")) {
-									button[g+c-a][y+d-b].setIcon(null);
+							}else if(current == button[g+xMod2A][y+yMod2A]) {
+								if(button[g+xMod2A-xModA][y+yMod2A-yModA].getIcon().toString().equals("blackPiece.png")) {
+									button[g+xMod2A-xModA][y+yMod2A-yModA].setIcon(null);
 									return true;
 								}
-							}else if(current == button[g-c][y+d]) {
-								if(button[g-c+a][y+d-b].getIcon().toString().equals("blackPiece.png")) {
-									button[g-c+a][y+d-b].setIcon(null);
+							}else if(current == button[g-xMod2B][y+yMod2B]) {
+								if(button[g-xMod2B+xModB][y+yMod2B-yModB].getIcon().toString().equals("blackPiece.png")) {
+									button[g-xMod2B+xModB][y+yMod2B-yModB].setIcon(null);
 									return true;
 								}
 							}
