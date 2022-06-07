@@ -280,7 +280,7 @@ public class Checkers implements ActionListener {
 								return true;
 							}else if(current == button[g+xMod2A][y-yMod2A]) {
 								if(button[g+xMod2A-xModA][y-yMod2A+yModA].getIcon().toString().equals("whitePiece.png")) {
-									button[g-xMod2A+xModA][y-yMod2A+yModA].setIcon(null);
+									button[g+xMod2A-xModA][y-yMod2A+yModA].setIcon(null);
 									return true;
 								}
 							}else if(current == button[g-xMod2B][y-yMod2B]) {
