@@ -15,8 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 public class Checkers implements ActionListener {
-	boolean whiteTurn = true;
-	boolean blackTurn = false;
+	boolean whiteTurn = false;
+	boolean blackTurn = true;
 	boolean ran = false;
 	int whiteWins = 0;
 	int blackWins = 0;
@@ -40,10 +40,14 @@ public class Checkers implements ActionListener {
 	String currentTile;
 	JTextField xChangeField = new JTextField();
 	JTextField oChangeField = new JTextField();
-	ImageIcon whitePiece = new ImageIcon("blackPiece.png");
-	ImageIcon blackPiece = new ImageIcon("whitePiece.png");
-	ImageIcon whitePieceH = new ImageIcon("whitePieceH.png");
-	ImageIcon blackPieceH = new ImageIcon("blackPieceH.png");
+	ImageIcon whitePiece = new ImageIcon("whitePiece.png");
+	ImageIcon blackPiece = new ImageIcon("blackPiece.png");
+	ImageIcon whitePieceH = new ImageIcon("blackPieceH.png");
+	ImageIcon blackPieceH = new ImageIcon("whitePieceH.png");
+	ImageIcon blackKing = new ImageIcon("whiteKing.png");
+	ImageIcon whiteKing = new ImageIcon("blackKing.png");
+	ImageIcon blackKingH = new ImageIcon("whitePieceHKing.png");
+	ImageIcon whiteKingH = new ImageIcon("blackPieceHKing.png");
 	
 	public Checkers() { //initializes the board
 		frame.setSize(800,800);
@@ -136,10 +140,10 @@ public class Checkers implements ActionListener {
 	
 	public void onTile(JButton current, JButton preCurrent, String currentTile, String preCurrentTile, int x, int y) {
 		if(preCurrent.getIcon() != null) {
-			if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+			if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
 				preCurrent.setIcon(null);
 				current.setIcon(whitePiece);
-			}else if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+			}else if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
 				preCurrent.setIcon(null);
 				current.setIcon(blackPiece);
 			}else {
@@ -150,13 +154,13 @@ public class Checkers implements ActionListener {
 	
 	public void onPiece(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile) {
 		if(current.getIcon() != null) {
-			if(current.getIcon().toString().equals("blackPiece.png") && blackTurn) {
-				if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+			if(current.getIcon().toString().equals("whitePiece.png") && blackTurn) {
+				if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
 					preCurrent.setIcon(whitePiece);
 				}
 				current.setIcon(blackPieceH);
-			}if(current.getIcon().toString().equals("whitePiece.png") && whiteTurn) {
-				if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+			}if(current.getIcon().toString().equals("blackPiece.png") && whiteTurn) {
+				if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
 					preCurrent.setIcon(blackPiece);
 				}
 				current.setIcon(whitePieceH);
@@ -185,11 +189,12 @@ public class Checkers implements ActionListener {
 					}else {
 						if(isLegal(current, j, i)) {
 							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
+							check();
 						}else {
 							if(preCurrent.getIcon() != null) {
-								if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
+								if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
 									preCurrent.setIcon(whitePiece);
-								}else if(preCurrent.getIcon().toString().equals("whitePieceH.png")) {
+								}else if(preCurrent.getIcon().toString().equals("blackPieceH.png")) {
 									preCurrent.setIcon(blackPiece);
 								}
 							}
@@ -203,18 +208,13 @@ public class Checkers implements ActionListener {
 	
 	public void check() {
 		//checks for kings
-		for (int y = 'a'; y < 'i'; y++) {
-			for (int x = 0; x < 8; x++) {
-				String tile = (char)y + String.valueOf(x);
-				if(pieceMap.get(tile) != null) {
-					int temp = pieceMap.get(tile);
-					char yy = String.valueOf(pieceMap.get(tile)).charAt(5);
-					char isBlack = String.valueOf(pieceMap.get(tile)).charAt(3);
-					char isKing = String.valueOf(pieceMap.get(tile)).charAt(1);
-					if((yy == 0) && (isBlack == 0) && (isKing == 0)) {
-						pieceMap.put(tile, temp + 10000);
-					}else if((yy == 7) && (isBlack == 1) && (isKing == 0)) {
-						pieceMap.put(tile, temp + 10000);
+		for (int i = 0; i < button.length; i++) {
+			for (int j = 0; j < button[0].length; j++) {
+				if(button[j][i].getIcon() != null) {
+					if(i == 0 && button[j][i].getIcon().toString().equals("whitePiece.png")) {
+						button[j][i].setIcon(blackKing);
+					}else if(i == 7 && button[j][i].getIcon().toString().equals("blackPiece.png")){
+						button[j][i].setIcon(whiteKing);
 					}
 				}
 			}
@@ -248,59 +248,64 @@ public class Checkers implements ActionListener {
 					int xMod2A = 2; int xMod2B = 2;
 					int yMod2A = 2; int yMod2B = 2;
 					
-					//TODO this part is fucked idk y
 					if(g == 6) {
 						xMod2A = 0;
-					}else if(y == 6) {
-						yMod2A = 0;
-					}else if(g == 0) {
-						xModA = 0;
-						xMod2A = 0;
-					}else if(y == 0) {
-						yModA = 0;
-						yMod2A = 0;
 					}
-					
-					if(g == 1) {
-						xMod2B = 0;
-					}else if(y == 1) {
-						yMod2B = 0;
-					}else if(g == 7) {
+					if(y == 6) {
+						//yMod2B = 0;
+					}
+					if(g == 0) {
 						xModB = 0;
 						xMod2B = 0;
-					}else if(y == 7) {
-						yModB = 0;
-						yMod2B = 0;
 					}
+					if(y == 0) {
+						//yModA = 0;
+						//yMod2A = 0;
+					}
+					if(g == 1) {
+						xMod2B = 0;
+					}
+					if(y == 1) {
+						//yMod2A = 0;
+					}
+					if(g == 7) {
+						xModA = 0;
+						xMod2A = 0;
+					}
+					if(y == 7) {
+						//yModB = 0;
+						//yMod2B = 0;
+					}
+
 
 
 					if(blackTurn) {
-						if(button[g][y].getIcon().toString().equals("blackPieceH.png")) {
+						if(button[g][y].getIcon().toString().equals("whitePieceH.png")) {
 							if(current == button[g+xModA][y-yModA] || current == button[g-xModB][y-yModB]) {
 								return true;
 							}else if(current == button[g+xMod2A][y-yMod2A]) {
-								if(button[g+xMod2A-xModA][y-yMod2A+yModA].getIcon().toString().equals("whitePiece.png")) {
+								if(button[g+xMod2A-xModA][y-yMod2A+yModA].getIcon().toString().equals("blackPiece.png")) {
 									button[g+xMod2A-xModA][y-yMod2A+yModA].setIcon(null);
 									return true;
 								}
 							}else if(current == button[g-xMod2B][y-yMod2B]) {
-								if(button[g-xMod2B+xModB][y-yMod2B+yModB].getIcon().toString().equals("whitePiece.png")) {
+								if(button[g-xMod2B+xModB][y-yMod2B+yModB].getIcon().toString().equals("blackPiece.png")) {
 									button[g-xMod2B+xModB][y-yMod2B+yModB].setIcon(null);
 									return true;
 								}
 							}
 						}
 					}else if(whiteTurn) {
-						if(button[g][y].getIcon().toString().equals("whitePieceH.png")) {
+						if(button[g][y].getIcon().toString().equals("blackPieceH.png")) {
 							if(current == button[g+xModA][y+yModA] || current == button[g-xModB][y+yModB]) {
 								return true;
 							}else if(current == button[g+xMod2A][y+yMod2A]) {
-								if(button[g+xMod2A-xModA][y+yMod2A-yModA].getIcon().toString().equals("blackPiece.png")) {
+								if(button[g+xMod2A-xModA][y+yMod2A-yModA].getIcon().toString().equals("whitePiece.png")) {
 									button[g+xMod2A-xModA][y+yMod2A-yModA].setIcon(null);
 									return true;
 								}
 							}else if(current == button[g-xMod2B][y+yMod2B]) {
-								if(button[g-xMod2B+xModB][y+yMod2B-yModB].getIcon().toString().equals("blackPiece.png")) {
+								if(button[g-xMod2B+xModB][y+yMod2B-yModB].getIcon().toString().equals("whitePiece.png")) {
 									button[g-xMod2B+xModB][y+yMod2B-yModB].setIcon(null);
 									return true;
 								}
@@ -313,5 +318,4 @@ public class Checkers implements ActionListener {
 		swap();
 		return false;
 	}
-	
 }
