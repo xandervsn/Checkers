@@ -153,7 +153,7 @@ public class Checkers implements ActionListener {
 				preCurrent.setIcon(null);
 				current.setIcon(blackKing);
 			}else {
-				swap();
+				
 			}
 		}
 	}
@@ -224,9 +224,11 @@ public class Checkers implements ActionListener {
 					if(current.getIcon() != null) {
 						onPiece(current, preCurrent, currentTile, preCurrentTile);
 					}else {
-						if(isLegal(current, j, i)) {
+						if(isLegal(current, j, i) && isLast()) {
 							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
-							check();
+							checkKings();
+							checkWin();
+							swap();
 						}else {
 							if(preCurrent.getIcon() != null) {
 								if(preCurrent.getIcon() == whitePieceH) {
@@ -240,14 +242,13 @@ public class Checkers implements ActionListener {
 								}
 							}
 						}
-						swap();
 					}
 				}
 			}
 		}
 	}
 	
-	public void check() {
+	public void checkKings() {
 		//checks for kings
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
@@ -280,7 +281,91 @@ public class Checkers implements ActionListener {
 	button[g-1][y-1]
 	 */
 	
+	public void checkWin() {
+		boolean foundBlack = false;
+		boolean foundWhite = false;
+		for (int i = 0; i < button.length; i++) {
+			for (int j = 0; j < button[0].length; j++) {
+				if(button[j][i].getIcon() == blackPiece || button[j][i].getIcon() == blackKing) {
+					foundBlack = true;
+				}
+				if(button[j][i].getIcon() == whitePiece || button[j][i].getIcon() == whiteKing) {
+					foundWhite = true;
+				}
+			}
+		}
+		if(!foundBlack) {
+			blackWins++;
+			new Checkers();
+		}
+		if(!foundWhite) {
+			whiteWins++;
+			new Checkers();
+		}
+	}
+	
+	public boolean isLast() {
+		for (int i = 0; i < button.length; i++) {
+			for (int j = 0; j < button[0].length; j++) {
+				if(button[j][i].getIcon() != null) {
+					if(whiteTurn) {
+						//TODO: currently if 2 pieces r doubled up it returns false
+						if(button[j][i].getIcon() == whitePieceH || button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whitePiece || button[j][i].getIcon() == whiteKing) {
+							if(j < 6 && i > 1) {
+								if((button[j+1][i-1].getIcon() == blackPiece && button[j+2][i-2].getIcon() == null) || (button[j+1][i-1].getIcon() == blackKing && button[j+2][i-2].getIcon() == null)) {
+									return false;
+								}
+							}
+							if(j > 1 && i > 1) {
+									if((button[j-1][i-1].getIcon() == blackPiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == blackKing && button[j-2][i-2].getIcon() == null)) {
+										return false;
+									}
+							}
+						}if(button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whiteKing) {
+							if(j < 6 && i < 6) {
+									if((button[j+1][i+1].getIcon() == blackPiece && button[j+2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == blackKing && button[j+2][i+2].getIcon() == null)) {
+										return false;
+									}
+							}
+							if(j > 1 && i < 6) {
+									if((button[j-1][i+1].getIcon() == blackPiece && button[j-2][i+2].getIcon() == null) || (button[j-1][i+1].getIcon() == blackKing) && button[j-2][i+2].getIcon() == null) {
+										return false;
+									}
+							}
+						}	
+					}else if(blackTurn) {
+						if(button[j][i].getIcon() == blackPieceH || button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackPiece || button[j][i].getIcon() == blackKing) {
+							if(j > 6 && i < 6) {
+									if((button[j-1][i+1].getIcon() == blackKing && button[j-2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == whiteKing && button[j-2][i+2].getIcon() == null)) {
+										return false;
+									}
+							}
+							if(j > 1 && i < 6) {
+									if((button[j-1][i+1].getIcon() == whitePiece || button[j-1][i+1].getIcon() == whiteKing) && button[j-2][i+2].getIcon() == null) {
+										return false;
+									}
+							}if(button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackKing) {
+								if(j < 6 && i > 1) {
+										if((button[j+1][i-1].getIcon() == whitePiece || button[j+1][i-1].getIcon() == whiteKing) && button[j+2][i-2].getIcon() == null) {
+											return false;
+										}
+								}
+								if(j > 1 && i > 1) {
+										if((button[j-1][i-1].getIcon() == whitePiece || button[j-1][i-1].getIcon() == whiteKing) && button[j-2][i-2].getIcon() == null) {
+											return false;
+										}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
 	public boolean isLegal(JButton current, int j, int i) {
+		isLast();
 		for (int y = 0; y < button.length; y++) {
 			for (int g = 0; g < button[0].length; g++) {
 				if(button[g][y].getIcon() != null){
@@ -288,130 +373,114 @@ public class Checkers implements ActionListener {
 							button[g][y].getIcon() == whitePieceH ||
 							button[g][y].getIcon() == blackKingH ||
 							button[g][y].getIcon() == whiteKingH) {
-						int xModA = 1; int xModB = 1;
-						int yModA = 1; int yModB = 1;
-						int xMod2A = 2; int xMod2B = 2;
-						int yMod2A = 2; int yMod2B = 2;
-						
-						if(g == 6) {
-							xMod2A = 0;
-						}
-						if(y == 6) {
-							yMod2B = 0;
-						}
-						if(g == 0) {
-							xModB = 0;
-							xMod2B = 0;
-						}
-						if(y == 0) {
-							yModA = 0;
-							yMod2A = 0;
-						}
-						if(g == 1) {
-							xMod2B = 0;
-							}
-						if(y == 1) {
-							yMod2A = 0;
-						}
-						if(g == 7) {
-							xModA = 0;
-							xMod2A = 0;
-						}
-						if(y == 7) {
-							yModB = 0;
-							yMod2B = 0;
-						}
-		
 						if(whiteTurn) {
-							if(button[g][y].getIcon() == whitePieceH) {
-								if(current == button[g+xModA][y-1] || current == button[g-xModB][y-1]) {
+							if(button[g][y].getIcon() == whitePieceH || button[g][y].getIcon() == whiteKingH) {
+								if(g < 7 && y > 0) {
+									if(current == button[g+1][y-1]) {
 									return true;
-								}else if(current == button[g+xMod2A][y-2]) {
-									if(button[g+xMod2A-xModA][y-2+1].getIcon() == blackPiece || button[g+xMod2A-xModA][y-2+1].getIcon() == blackKing) {
-										button[g+xMod2A-xModA][y-2+1].setIcon(null);
-										return true;
 									}
-								}else if(current == button[g-xMod2B][y-2]) {
-									if(button[g-xMod2B+xModB][y-2+1].getIcon() == blackPiece || button[g-xMod2B+xModB][y-2+1].getIcon() == blackKing) {
-										button[g-xMod2B+xModB][y-2+1].setIcon(null);
+								}
+								if(g > 0 && y > 0) {
+									if(current == button[g-1][y-1]) {
 										return true;
 									}
 								}
-							}else if(button[g][y].getIcon() == whiteKingH) {
-								if(y < 6) {
-									if(current == button[g+xModA][y+1] || current == button[g-xModB][y+1]) {
-										return true;
-									}else if(current == button[g+xMod2A][y+2]) {
-										if(button[g+xMod2A-xModA][y+2-1].getIcon() == blackPiece || button[g+xMod2A-xModA][y+2-1].getIcon() == blackKing) {
-											button[g+xMod2A-xModA][y+2-1].setIcon(null);
-											return true;
-										}
-									}else if(current == button[g-xMod2B][y+2]) {
-										if(button[g-xMod2B+xModB][y+2-1].getIcon() == blackPiece || button[g-xMod2B+xModB][y-2+1].getIcon() == blackKing) {
-											button[g-xMod2B+xModB][y+2-1].setIcon(null);
-											return true;
-										}
-									}
-								}else if(y > 1) {
-									if(current == button[g+xModA][y-1] || current == button[g-xModB][y-1]) {
-										return true;
-									}else if(current == button[g+xMod2A][y-2]) {
-										if(button[g+xMod2A-xModA][y-2+1].getIcon() == blackPiece || button[g+xMod2A-xModA][y-2+1].getIcon() == blackKing) {
-											button[g+xMod2A-xModA][y-2+1].setIcon(null);
-											return true;
-										}
-									}else if(current == button[g-xMod2B][y-2]) {
-										if(button[g-xMod2B+xModB][y-2+1].getIcon() == blackPiece || button[g-xMod2B+xModB][y-2+1].getIcon() == blackKing) {
-											button[g-xMod2B+xModB][y-2+1].setIcon(null);
+								if(g < 6 && y > 1) {
+									if(current == button[g+2][y-2]) {
+										if(button[g+1][y-1].getIcon() == blackPiece || button[g+1][y-1].getIcon() == blackKing) {
+											button[g+1][y-1].setIcon(null);
 											return true;
 										}
 									}
 								}
-							}
+								if(g > 1 && y > 1) {
+									if(current == button[g-2][y-2]) {
+										if(button[g-1][y-1].getIcon() == blackPiece || button[g-1][y-1].getIcon() == blackKing) {
+											button[g-1][y-1].setIcon(null);
+											return true;
+										}
+									}
+								}
+							}if(button[g][y].getIcon() == whiteKingH) {
+								if(g < 7 && y < 7) {
+									if(current == button[g+1][y+1]) {
+									return true;
+									}
+								}
+								if(g > 0 && y < 7) {
+									if(current == button[g-1][y+1]) {
+										return true;
+									}
+								}
+								if(g < 6 && y < 6) {
+									if(current == button[g+2][y+2]) {
+										if(button[g+1][y+1].getIcon() == blackPiece || button[g+1][y+1].getIcon() == blackKing) {
+											button[g+1][y+1].setIcon(null);
+											return true;
+										}
+									}
+								}
+								if(g > 1 && y < 6) {
+									if(current == button[g-2][y+2]) {
+										if(button[g-1][y+1].getIcon() == blackPiece || button[g-1][y+1].getIcon() == blackKing) {
+											button[g-1][y+1].setIcon(null);
+											return true;
+										}
+									}
+								}
+							}	
 						}else if(blackTurn) {
-							if(button[g][y].getIcon() == blackPieceH) {
-								if(current == button[g+xModA][y+1] || current == button[g-xModB][y+1]) {
+							if(button[g][y].getIcon() == blackPieceH || button[g][y].getIcon() == blackKingH) {
+								if(g < 7 && y < 7) {
+									if(current == button[g+1][y+1]) {
 									return true;
-								}else if(current == button[g+xMod2A][y+2]) {
-									if(button[g+xMod2A-xModA][y+2-1].getIcon() == whitePiece || button[g+xMod2A-xModA][y+2-1].getIcon() == whiteKing) {
-										button[g+xMod2A-xModA][y+2-1].setIcon(null);
-										return true;
 									}
-								}else if(current == button[g-xMod2B][y+2]) {
-									if(button[g-xMod2B+xModB][y+2-1].getIcon() == whitePiece || button[g-xMod2B+xModB][y+2-1].getIcon() == whiteKing) {
-										button[g-xMod2B+xModB][y+2-1].setIcon(null);
+								}
+								if(g > 0 && y < 7) {
+									if(current == button[g-1][y+1]) {
 										return true;
 									}
 								}
-							}else if(button[g][y].getIcon() == blackKingH) {
-								if(y < 6) {
-									if(current == button[g+xModA][y+1] || current == button[g-xModB][y+1]) {
-										return true;
-									}else if(current == button[g+xMod2A][y+2]) {
-										if(button[g+xMod2A-xModA][y+2-1].getIcon() == whitePiece || button[g+xMod2A-xModA][y-2+1].getIcon() == whiteKing) {
-											button[g+xMod2A-xModA][y+2-1].setIcon(null);
-											return true;
-										}
-									}else if(current == button[g-xMod2B][y+2]) {
-										if(button[g-xMod2B+xModB][y+2-1].getIcon() == whitePiece || button[g-xMod2B+xModB][y-2+1].getIcon() == whiteKing) {
-											button[g-xMod2B+xModB][y+2-1].setIcon(null);
+								if(g < 6 && y < 6) {
+									if(current == button[g+2][y+2]) {
+										if(button[g+1][y+1].getIcon() == whitePiece || button[g+1][y+1].getIcon() == whiteKing) {
+											button[g+1][y+1].setIcon(null);
 											return true;
 										}
 									}
 								}
-								//TODO: when y == 1, the program doesn't return true because it's scared <- FIX THIS
-								if(y > 1) {
-									if(current == button[g+xModA][y-1] || current == button[g-xModB][y-1]) {
-										return true;
-									}else if(current == button[g+xMod2A][y-2]) {
-										if(button[g+xMod2A-xModA][y-2+1].getIcon() == whitePiece || button[g+xMod2A-xModA][y-2+1].getIcon() == whiteKing) {
-											button[g+xMod2A-xModA][y-2+1].setIcon(null);
+								if(g > 1 && y < 6) {
+									if(current == button[g-2][y+2]) {
+										if(button[g-1][y+1].getIcon() == whitePiece || button[g-1][y+1].getIcon() == whiteKing) {
+											button[g-1][y+1].setIcon(null);
 											return true;
 										}
-									}else if(current == button[g-xMod2B][y-2]) {
-										if(button[g-xMod2B+xModB][y-2+1].getIcon() == whitePiece || button[g-xMod2B+xModB][y-2+1].getIcon() == whiteKing) {
-											button[g-xMod2B+xModB][y-2+1].setIcon(null);
+									}
+								}if(button[g][y].getIcon() == blackKingH) {
+									if(g < 7 && y > 0) {
+										if(current == button[g+1][y-1]) {
+										return true;
+										}
+									}
+									if(g > 0 && y > 0) {
+										if(current == button[g-1][y-1]) {
 											return true;
+										}
+									}
+									if(g < 6 && y > 1) {
+										if(current == button[g+2][y-2]) {
+											if(button[g+1][y-1].getIcon() == whitePiece || button[g+1][y-1].getIcon() == whiteKing) {
+												button[g+1][y-1].setIcon(null);
+												return true;
+											}
+										}
+									}
+									if(g > 1 && y > 1) {
+										if(current == button[g-2][y-2]) {
+											if(button[g-1][y-1].getIcon() == whitePiece || button[g-1][y-1].getIcon() == whiteKing) {
+												button[g-1][y-1].setIcon(null);
+												return true;
+											}
 										}
 									}
 								}
@@ -421,7 +490,6 @@ public class Checkers implements ActionListener {
 				}
 			}
 		}
-		swap();
 		return false;
 	}
 }
