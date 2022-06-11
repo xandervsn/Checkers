@@ -6,7 +6,6 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,8 +18,6 @@ public class Checkers implements ActionListener {
 	boolean ran = false;
 	int whiteWins = 0;
 	int blackWins = 0;
-	HashMap<String, String> boardMap = new HashMap<String, String>();
-	HashMap<String, Integer> pieceMap = new HashMap<String, Integer>();
 	
 	//containers
 	Container center = new Container();
@@ -84,19 +81,13 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void place(){
-		for (int y = 'a'; y < 'i'; y++) {
-			for (int x = 0; x < 8; x++) {
-				String tile = (char)y + String.valueOf(x);
-				//DONE: boardMap<tile, piece> - not a boolean, but an actual value you can use
-				//(will still functionally be a boolean if returned as null
-				boardMap.put(tile, null);
-			}
-		}
+		//places pieces on board
 		/* a b c d e f g h
 		 * 0 1 2 3 4 5 6 7
 		 */
 		int y = 'a';
 		for (int x = 1; x < 10; x += 2) {
+			//loops through the whole board
 			if(x == 9) {
 				x = 0;
 				y++;
@@ -107,16 +98,13 @@ public class Checkers implements ActionListener {
 			if(y == 'd') {
 				y = 'f';
 			}
+			//moves down through the board
 			String tile = (char)y + String.valueOf(x);
-			boardMap.put(tile, tile);
-			//king, alive, white, position
 			
 			if(y > 'c') {
 				button[x][y-97].setIcon(whitePiece);
-				pieceMap.put(tile, 900000);
 			}else {
 				button[x][y-97].setIcon(blackPiece);
-				pieceMap.put(tile, 900100);
 			}
 			
 			if(tile.equals("h6")) {
@@ -131,8 +119,10 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void clear() {
+		//clears the board
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
+				//loops through the whole board and resets it
 				button[j][i].setIcon(null);
 			}
 		}
@@ -140,6 +130,7 @@ public class Checkers implements ActionListener {
 	
 	
 	public void onForfeit() {
+		//forfeits the game, and gives the opposing team the win
 		if(blackTurn) {
 			whiteWins++;
 		}else if(whiteTurn) {
@@ -150,6 +141,8 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void onTile(JButton current, JButton preCurrent, String currentTile, String preCurrentTile, int x, int y) {
+		//what happens when a tile is pressed, if possible
+		//executes move of piece
 		if(preCurrent.getIcon() != null) {
 			if(preCurrent.getIcon() == whitePieceH) {
 				preCurrent.setIcon(null);
@@ -170,6 +163,8 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void onPiece(JButton current, JButton preCurrent, String currentTile, String PreCurrentTile) {
+		//what happens when a piece is pressed, if possible
+		//executes highlight of piece
 		if(current.getIcon() != null) {
 			if(blackTurn) {
 				if(current.getIcon() == blackPiece) {
@@ -195,6 +190,7 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void unhighlight() {
+		//removes highlight from a piece
 		if(preCurrent != current) {
 			if(preCurrent.getIcon() == whitePieceH) {
 				preCurrent.setIcon(whitePiece);
@@ -217,12 +213,16 @@ public class Checkers implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		//implemented method: when any button is pressed
 		if(e.getSource().equals(forfeit)) {
+			//forfeit button pressed
 			onForfeit();
 		}
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
+				//loops through whole board
 				if(e.getSource().equals(button[j][i])) {
+					//finds out what button was pressed
 					if(ran && current.getIcon() != null) {
 						preCurrent = current;
 						preCurrentTile = currentTile;
@@ -236,20 +236,24 @@ public class Checkers implements ActionListener {
 					ran = true;
 					
 					if(current.getIcon() != null) {
+						//if the tile has an icon, there's a piece on it
 						onPiece(current, preCurrent, currentTile, preCurrentTile);
 					}else {
+						//if it doesn't, it's just a normal tile
 						if(isLegal(current, j, i) && (take || isLast())) {
 							System.out.println(isLast());
 							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
 							checkKings();
 							checkWin();
 							if(take && !isLast()) {
+								//allows for 'chaining' of takes
 								System.out.println(isLast());
 								swap();
 							}
 							take = false;
 							swap();
 						}else {
+							//if move is illegal
 							if(preCurrent.getIcon() != null) {
 								if(preCurrent.getIcon() == whitePieceH) {
 									preCurrent.setIcon(whitePiece);
@@ -272,7 +276,9 @@ public class Checkers implements ActionListener {
 		//checks for kings
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
+				//loops through whole board
 				if(button[j][i].getIcon() != null) {
+					//if a white piece is at the top, or black at the bottom, it becomes a king
 					if(i == 0 && button[j][i].getIcon() == whitePiece) {
 						button[j][i].setIcon(whiteKing);
 					}else if(i == 7 && button[j][i].getIcon() == blackPiece){
@@ -284,6 +290,7 @@ public class Checkers implements ActionListener {
 	}
 	
 	public void swap() {
+		//changes turn
 		if(blackTurn) {
 			blackTurn = false;
 			whiteTurn = true;
@@ -302,10 +309,12 @@ public class Checkers implements ActionListener {
 	 */
 	
 	public void checkWin() {
+		//checks for any wins
 		boolean foundBlack = false;
 		boolean foundWhite = false;
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
+				//loops through whole board, looking for black/white pieces
 				if(button[j][i].getIcon() == blackPiece || button[j][i].getIcon() == blackKing) {
 					foundBlack = true;
 				}
@@ -314,6 +323,7 @@ public class Checkers implements ActionListener {
 				}
 			}
 		}
+		//if none of some piece is found, the opposing team wins
 		if(!foundBlack) {
 			blackWins++;
 			clear();
@@ -327,32 +337,38 @@ public class Checkers implements ActionListener {
 	}
 	
 	public boolean isLast() {
+		//finds if a take is impossible
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
+				//loops through whole board
 				if(button[j][i].getIcon() != null) {
 					if(whiteTurn) {
-						//DONE: currently if 2 pieces r doubled up it returns false
 						if(button[j][i].getIcon() == whitePieceH || button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whitePiece || button[j][i].getIcon() == whiteKing) {
 							if(j < 6 && i > 1) {
+								//right & up
 								if((button[j+1][i-1].getIcon() == blackPiece && button[j+2][i-2].getIcon() == null) || (button[j+1][i-1].getIcon() == blackKing && button[j+2][i-2].getIcon() == null)) {
 									System.out.println("1");
 									return false;
 								}
 							}
 							if(j > 1 && i > 1) {
+								//left & up
 								if((button[j-1][i-1].getIcon() == blackPiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == blackKing && button[j-2][i-2].getIcon() == null)) {
 									System.out.println("2");
 									return false;
 								}
 							}
 						}if(button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whiteKing) {
+							//kings only
 							if(j < 6 && i < 6) {
+									//right & down
 									if((button[j+1][i+1].getIcon() == blackPiece && button[j+2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == blackKing && button[j+2][i+2].getIcon() == null)) {
 										System.out.println("3");
 										return false;
 									}
 							}
 							if(j > 1 && i < 6) {
+									//left & down
 									if((button[j-1][i+1].getIcon() == blackPiece && button[j-2][i+2].getIcon() == null) || ((button[j-1][i+1].getIcon() == blackKing) && button[j-2][i+2].getIcon() == null)) {
 										System.out.println("4");
 										return false;
@@ -362,24 +378,29 @@ public class Checkers implements ActionListener {
 					}else if(blackTurn) {
 						if(button[j][i].getIcon() == blackPieceH || button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackPiece || button[j][i].getIcon() == blackKing) {
 							if(j > 1 && i < 6) {
+									//left & down
 									if((button[j-1][i+1].getIcon() == whitePiece && button[j-2][i+2].getIcon() == null) || (button[j-1][i+1].getIcon() == whiteKing && button[j-2][i+2].getIcon() == null)) {
 										System.out.println("5");
 										return false;
 									}
 							}
 							if(j < 6 && i < 6) {
+									//right & down
 									if((button[j+1][i+1].getIcon() == whitePiece && button[j+2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == whiteKing && button[j+2][i+2].getIcon() == null)) {
 										System.out.println("6");
 										return false;
 									}
 							}if(button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackKing) {
+								//kings only
 								if(j < 6 && i > 1) {
+										//right & up
 										if((button[j+1][i-1].getIcon() == whitePiece && button[j+2][i-2].getIcon() == null) || (button[j+1][i-1].getIcon() == whiteKing && button[j+2][i-2].getIcon() == null)) {
 											System.out.println("7");
 											return false;
 										}
 								}
 								if(j > 1 && i > 1) {
+										//left & up
 										if((button[j-1][i-1].getIcon() == whitePiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == whiteKing && button[j-2][i-2].getIcon() == null)) {
 											System.out.println("8");
 											return false;
@@ -395,28 +416,36 @@ public class Checkers implements ActionListener {
 	}
 	
 	public boolean isLegal(JButton current, int j, int i) {
-		isLast();
+		//finds if a move is within range
 		for (int y = 0; y < button.length; y++) {
 			for (int g = 0; g < button[0].length; g++) {
+				//loops through board
 				if(button[g][y].getIcon() != null){
 					if(button[g][y].getIcon() == blackPieceH ||
 							button[g][y].getIcon() == whitePieceH ||
 							button[g][y].getIcon() == blackKingH ||
 							button[g][y].getIcon() == whiteKingH) {
+						//only analyzes highlighted piece
 						if(whiteTurn) {
 							if(button[g][y].getIcon() == whitePieceH || button[g][y].getIcon() == whiteKingH) {
+								//checks if intended tile is empty
 								if(g < 7 && y > 0) {
+									//right & up
 									if(current == button[g+1][y-1]) {
 									return true;
 									}
 								}
 								if(g > 0 && y > 0) {
+									//left & up
 									if(current == button[g-1][y-1]) {
 										return true;
 									}
 								}
 								if(g < 6 && y > 1) {
 									if(current == button[g+2][y-2]) {
+										//right & up
+										//if intended tile is 2 tiles away, figure out whether a take occurs
+										//if not, the move is not legal
 										if(button[g+1][y-1].getIcon() == blackPiece || button[g+1][y-1].getIcon() == blackKing) {
 											button[g+1][y-1].setIcon(null);
 											take = true;
@@ -426,6 +455,7 @@ public class Checkers implements ActionListener {
 								}
 								if(g > 1 && y > 1) {
 									if(current == button[g-2][y-2]) {
+										//left & up
 										if(button[g-1][y-1].getIcon() == blackPiece || button[g-1][y-1].getIcon() == blackKing) {
 											button[g-1][y-1].setIcon(null);
 											take = true;
@@ -436,16 +466,19 @@ public class Checkers implements ActionListener {
 							}if(button[g][y].getIcon() == whiteKingH) {
 								if(g < 7 && y < 7) {
 									if(current == button[g+1][y+1]) {
+										//right & down
 									return true;
 									}
 								}
 								if(g > 0 && y < 7) {
 									if(current == button[g-1][y+1]) {
+										//left & down
 										return true;
 									}
 								}
 								if(g < 6 && y < 6) {
 									if(current == button[g+2][y+2]) {
+										//right & down
 										if(button[g+1][y+1].getIcon() == blackPiece || button[g+1][y+1].getIcon() == blackKing) {
 											button[g+1][y+1].setIcon(null);
 											take = true;
@@ -455,6 +488,7 @@ public class Checkers implements ActionListener {
 								}
 								if(g > 1 && y < 6) {
 									if(current == button[g-2][y+2]) {
+										//left & down
 										if(button[g-1][y+1].getIcon() == blackPiece || button[g-1][y+1].getIcon() == blackKing) {
 											button[g-1][y+1].setIcon(null);
 											take = true;
@@ -467,16 +501,19 @@ public class Checkers implements ActionListener {
 							if(button[g][y].getIcon() == blackPieceH || button[g][y].getIcon() == blackKingH) {
 								if(g < 7 && y < 7) {
 									if(current == button[g+1][y+1]) {
+										//right & down
 									return true;
 									}
 								}
 								if(g > 0 && y < 7) {
 									if(current == button[g-1][y+1]) {
+										//left & down
 										return true;
 									}
 								}
 								if(g < 6 && y < 6) {
 									if(current == button[g+2][y+2]) {
+										//right & down
 										if(button[g+1][y+1].getIcon() == whitePiece || button[g+1][y+1].getIcon() == whiteKing) {
 											button[g+1][y+1].setIcon(null);
 											take = true;
@@ -486,6 +523,7 @@ public class Checkers implements ActionListener {
 								}
 								if(g > 1 && y < 6) {
 									if(current == button[g-2][y+2]) {
+										//left & down
 										if(button[g-1][y+1].getIcon() == whitePiece || button[g-1][y+1].getIcon() == whiteKing) {
 											button[g-1][y+1].setIcon(null);
 											take = true;
@@ -494,17 +532,20 @@ public class Checkers implements ActionListener {
 									}
 								}if(button[g][y].getIcon() == blackKingH) {
 									if(g < 7 && y > 0) {
+										//right & up
 										if(current == button[g+1][y-1]) {
 										return true;
 										}
 									}
 									if(g > 0 && y > 0) {
+										//left & up
 										if(current == button[g-1][y-1]) {
 											return true;
 										}
 									}
 									if(g < 6 && y > 1) {
 										if(current == button[g+2][y-2]) {
+											//right & up
 											if(button[g+1][y-1].getIcon() == whitePiece || button[g+1][y-1].getIcon() == whiteKing) {
 												button[g+1][y-1].setIcon(null);
 												take = true;
@@ -513,6 +554,7 @@ public class Checkers implements ActionListener {
 										}
 									}
 									if(g > 1 && y > 1) {
+										//left & up
 										if(current == button[g-2][y-2]) {
 											if(button[g-1][y-1].getIcon() == whitePiece || button[g-1][y-1].getIcon() == whiteKing) {
 												button[g-1][y-1].setIcon(null);
