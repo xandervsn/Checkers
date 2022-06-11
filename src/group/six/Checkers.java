@@ -33,14 +33,14 @@ public class Checkers implements ActionListener {
 	JButton current;
 	String preCurrentTile;
 	String currentTile;
-	ImageIcon whitePiece = new ImageIcon("whitePiece.png");
-	ImageIcon blackPiece = new ImageIcon("blackPiece.png");
-	ImageIcon blackPieceH = new ImageIcon("blackPieceH.png");
-	ImageIcon whitePieceH = new ImageIcon("whitePieceH.png");
-	ImageIcon whiteKing = new ImageIcon("whiteKing.png");
-	ImageIcon blackKing = new ImageIcon("blackKing.png");
-	ImageIcon whiteKingH = new ImageIcon("whiteKingH.png");
-	ImageIcon blackKingH = new ImageIcon("blackKingH.png");
+	ImageIcon whitePiece = new ImageIcon("images\\whitePiece.png");
+	ImageIcon blackPiece = new ImageIcon("images\\blackPiece.png");
+	ImageIcon blackPieceH = new ImageIcon("images\\blackPieceH.png");
+	ImageIcon whitePieceH = new ImageIcon("images\\whitePieceH.png");
+	ImageIcon whiteKing = new ImageIcon("images\\whiteKing.png");
+	ImageIcon blackKing = new ImageIcon("images\\blackKing.png");
+	ImageIcon whiteKingH = new ImageIcon("images\\whiteKingH.png");
+	ImageIcon blackKingH = new ImageIcon("images\\blackKingH.png");
 	boolean take = false;
 	
 	public Checkers() { //initializes the board
