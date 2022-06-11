@@ -12,7 +12,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 
 public class Checkers implements ActionListener {
 	boolean blackTurn = false;
@@ -30,16 +29,13 @@ public class Checkers implements ActionListener {
 	//JThings
 	JFrame frame = new JFrame();
 	JButton[][] button = new JButton[8][8];
-	JLabel xLabel = new JLabel("X's wins: 0");
-	JLabel oLabel = new JLabel("O's wins: 0");
-	JButton xChangeName = new JButton("Change X's Name.");
-	JButton oChangeName = new JButton("Change O's Name.");
+	JLabel whiteLabel = new JLabel("X's wins: 0");
+	JLabel blackLabel = new JLabel("O's wins: 0");
+	JButton forfeit = new JButton("Forefeit");
 	JButton preCurrent;
 	JButton current;
 	String preCurrentTile;
 	String currentTile;
-	JTextField xChangeField = new JTextField();
-	JTextField oChangeField = new JTextField();
 	ImageIcon whitePiece = new ImageIcon("whitePiece.png");
 	ImageIcon blackPiece = new ImageIcon("blackPiece.png");
 	ImageIcon blackPieceH = new ImageIcon("blackPieceH.png");
@@ -48,6 +44,7 @@ public class Checkers implements ActionListener {
 	ImageIcon blackKing = new ImageIcon("blackKing.png");
 	ImageIcon whiteKingH = new ImageIcon("whiteKingH.png");
 	ImageIcon blackKingH = new ImageIcon("blackKingH.png");
+	boolean take = false;
 	
 	public Checkers() { //initializes the board
 		frame.setSize(800,800);
@@ -70,19 +67,23 @@ public class Checkers implements ActionListener {
 		frame.add(center, BorderLayout.CENTER);
 		//North Container
 		north.setLayout(new GridLayout(1,2));
-		north.add(xLabel);
-		north.add(oLabel);
-		north.add(xChangeName);
-		xChangeName.addActionListener((ActionListener) this);
-		north.add(xChangeField);
-		north.add(oChangeName);
-		oChangeName.addActionListener((ActionListener) this);
-		north.add(oChangeField);
+		north.add(whiteLabel);
+		north.add(blackLabel);
+		north.add(forfeit);
+		forfeit.addActionListener((ActionListener) this);
 		frame.add(north, BorderLayout.NORTH);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		
+		place();
+	}
+
+	public static void main(String[] args) {
+		new Checkers();
+	}
+	
+	public void place(){
 		for (int y = 'a'; y < 'i'; y++) {
 			for (int x = 0; x < 8; x++) {
 				String tile = (char)y + String.valueOf(x);
@@ -122,20 +123,30 @@ public class Checkers implements ActionListener {
 				x = 10;
 			}
 		}
+		whiteLabel.setText("White's Wins: " + whiteWins);
+		blackLabel.setText("Black's Wins: " + blackWins);
+		
+		whiteTurn = true;
+		blackTurn = false;
 	}
-
-	public static void main(String[] args) {
-		new Checkers();
+	
+	public void clear() {
+		for (int i = 0; i < button.length; i++) {
+			for (int j = 0; j < button[0].length; j++) {
+				button[j][i].setIcon(null);
+			}
+		}
 	}
 	
 	
 	public void onForfeit() {
 		if(blackTurn) {
-			blackWins++;
-		}else if(whiteTurn) {
 			whiteWins++;
+		}else if(whiteTurn) {
+			blackWins++;
 		}
-		new Checkers();
+		clear();
+		place();
 	}
 	
 	public void onTile(JButton current, JButton preCurrent, String currentTile, String preCurrentTile, int x, int y) {
@@ -206,6 +217,9 @@ public class Checkers implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource().equals(forfeit)) {
+			onForfeit();
+		}
 		for (int i = 0; i < button.length; i++) {
 			for (int j = 0; j < button[0].length; j++) {
 				if(e.getSource().equals(button[j][i])) {
@@ -224,10 +238,16 @@ public class Checkers implements ActionListener {
 					if(current.getIcon() != null) {
 						onPiece(current, preCurrent, currentTile, preCurrentTile);
 					}else {
-						if(isLegal(current, j, i) && isLast()) {
+						if(isLegal(current, j, i) && (take || isLast())) {
+							System.out.println(isLast());
 							onTile(current, preCurrent, currentTile, preCurrentTile, j, i);
 							checkKings();
 							checkWin();
+							if(take && !isLast()) {
+								System.out.println(isLast());
+								swap();
+							}
+							take = false;
 							swap();
 						}else {
 							if(preCurrent.getIcon() != null) {
@@ -296,11 +316,13 @@ public class Checkers implements ActionListener {
 		}
 		if(!foundBlack) {
 			blackWins++;
-			new Checkers();
+			clear();
+			place();
 		}
 		if(!foundWhite) {
 			whiteWins++;
-			new Checkers();
+			clear();
+			place();
 		}
 	}
 	
@@ -309,49 +331,57 @@ public class Checkers implements ActionListener {
 			for (int j = 0; j < button[0].length; j++) {
 				if(button[j][i].getIcon() != null) {
 					if(whiteTurn) {
-						//TODO: currently if 2 pieces r doubled up it returns false
+						//DONE: currently if 2 pieces r doubled up it returns false
 						if(button[j][i].getIcon() == whitePieceH || button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whitePiece || button[j][i].getIcon() == whiteKing) {
 							if(j < 6 && i > 1) {
 								if((button[j+1][i-1].getIcon() == blackPiece && button[j+2][i-2].getIcon() == null) || (button[j+1][i-1].getIcon() == blackKing && button[j+2][i-2].getIcon() == null)) {
+									System.out.println("1");
 									return false;
 								}
 							}
 							if(j > 1 && i > 1) {
-									if((button[j-1][i-1].getIcon() == blackPiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == blackKing && button[j-2][i-2].getIcon() == null)) {
-										return false;
-									}
+								if((button[j-1][i-1].getIcon() == blackPiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == blackKing && button[j-2][i-2].getIcon() == null)) {
+									System.out.println("2");
+									return false;
+								}
 							}
 						}if(button[j][i].getIcon() == whiteKingH || button[j][i].getIcon() == whiteKing) {
 							if(j < 6 && i < 6) {
 									if((button[j+1][i+1].getIcon() == blackPiece && button[j+2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == blackKing && button[j+2][i+2].getIcon() == null)) {
+										System.out.println("3");
 										return false;
 									}
 							}
 							if(j > 1 && i < 6) {
-									if((button[j-1][i+1].getIcon() == blackPiece && button[j-2][i+2].getIcon() == null) || (button[j-1][i+1].getIcon() == blackKing) && button[j-2][i+2].getIcon() == null) {
+									if((button[j-1][i+1].getIcon() == blackPiece && button[j-2][i+2].getIcon() == null) || ((button[j-1][i+1].getIcon() == blackKing) && button[j-2][i+2].getIcon() == null)) {
+										System.out.println("4");
 										return false;
 									}
 							}
 						}	
 					}else if(blackTurn) {
 						if(button[j][i].getIcon() == blackPieceH || button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackPiece || button[j][i].getIcon() == blackKing) {
-							if(j > 6 && i < 6) {
-									if((button[j-1][i+1].getIcon() == blackKing && button[j-2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == whiteKing && button[j-2][i+2].getIcon() == null)) {
+							if(j > 1 && i < 6) {
+									if((button[j-1][i+1].getIcon() == whitePiece && button[j-2][i+2].getIcon() == null) || (button[j-1][i+1].getIcon() == whiteKing && button[j-2][i+2].getIcon() == null)) {
+										System.out.println("5");
 										return false;
 									}
 							}
-							if(j > 1 && i < 6) {
-									if((button[j-1][i+1].getIcon() == whitePiece || button[j-1][i+1].getIcon() == whiteKing) && button[j-2][i+2].getIcon() == null) {
+							if(j < 6 && i < 6) {
+									if((button[j+1][i+1].getIcon() == whitePiece && button[j+2][i+2].getIcon() == null) || (button[j+1][i+1].getIcon() == whiteKing && button[j+2][i+2].getIcon() == null)) {
+										System.out.println("6");
 										return false;
 									}
 							}if(button[j][i].getIcon() == blackKingH || button[j][i].getIcon() == blackKing) {
 								if(j < 6 && i > 1) {
-										if((button[j+1][i-1].getIcon() == whitePiece || button[j+1][i-1].getIcon() == whiteKing) && button[j+2][i-2].getIcon() == null) {
+										if((button[j+1][i-1].getIcon() == whitePiece && button[j+2][i-2].getIcon() == null) || (button[j+1][i-1].getIcon() == whiteKing && button[j+2][i-2].getIcon() == null)) {
+											System.out.println("7");
 											return false;
 										}
 								}
 								if(j > 1 && i > 1) {
-										if((button[j-1][i-1].getIcon() == whitePiece || button[j-1][i-1].getIcon() == whiteKing) && button[j-2][i-2].getIcon() == null) {
+										if((button[j-1][i-1].getIcon() == whitePiece && button[j-2][i-2].getIcon() == null) || (button[j-1][i-1].getIcon() == whiteKing && button[j-2][i-2].getIcon() == null)) {
+											System.out.println("8");
 											return false;
 										}
 								}
@@ -389,6 +419,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g+2][y-2]) {
 										if(button[g+1][y-1].getIcon() == blackPiece || button[g+1][y-1].getIcon() == blackKing) {
 											button[g+1][y-1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -397,6 +428,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g-2][y-2]) {
 										if(button[g-1][y-1].getIcon() == blackPiece || button[g-1][y-1].getIcon() == blackKing) {
 											button[g-1][y-1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -416,6 +448,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g+2][y+2]) {
 										if(button[g+1][y+1].getIcon() == blackPiece || button[g+1][y+1].getIcon() == blackKing) {
 											button[g+1][y+1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -424,6 +457,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g-2][y+2]) {
 										if(button[g-1][y+1].getIcon() == blackPiece || button[g-1][y+1].getIcon() == blackKing) {
 											button[g-1][y+1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -445,6 +479,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g+2][y+2]) {
 										if(button[g+1][y+1].getIcon() == whitePiece || button[g+1][y+1].getIcon() == whiteKing) {
 											button[g+1][y+1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -453,6 +488,7 @@ public class Checkers implements ActionListener {
 									if(current == button[g-2][y+2]) {
 										if(button[g-1][y+1].getIcon() == whitePiece || button[g-1][y+1].getIcon() == whiteKing) {
 											button[g-1][y+1].setIcon(null);
+											take = true;
 											return true;
 										}
 									}
@@ -471,6 +507,7 @@ public class Checkers implements ActionListener {
 										if(current == button[g+2][y-2]) {
 											if(button[g+1][y-1].getIcon() == whitePiece || button[g+1][y-1].getIcon() == whiteKing) {
 												button[g+1][y-1].setIcon(null);
+												take = true;
 												return true;
 											}
 										}
@@ -479,6 +516,7 @@ public class Checkers implements ActionListener {
 										if(current == button[g-2][y-2]) {
 											if(button[g-1][y-1].getIcon() == whitePiece || button[g-1][y-1].getIcon() == whiteKing) {
 												button[g-1][y-1].setIcon(null);
+												take = true;
 												return true;
 											}
 										}
