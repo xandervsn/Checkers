@@ -1,3 +1,10 @@
+/* Xander Siruno-Nebel
+ * Jackson Linehan
+ * June 11, 2022
+ * Java Programming
+ * Galbraith
+ */
+
 package group.six;
 
 import java.awt.BorderLayout;
